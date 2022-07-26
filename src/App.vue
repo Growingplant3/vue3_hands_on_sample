@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const items = ref([
   {
@@ -8,7 +8,8 @@ const items = ref([
     description:
       '刻んだ野菜をアボカドと混ぜてディップに。こんがり焼いたバゲットとお召し上がりください。',
     price: 480,
-    image: '/images/item1.jpg'
+    image: '/images/item1.jpg',
+    soldOut: false
   },
   {
     id: 2,
@@ -16,7 +17,8 @@ const items = ref([
     description:
       '子供のころに食べたかった、あのホットケーキを再現しました。素朴でどこか懐かしい味をどうぞ。',
     price: 1180,
-    image: '/images/item2.jpg'
+    image: '/images/item2.jpg',
+    soldOut: false
   },
   {
     id: 3,
@@ -24,7 +26,8 @@ const items = ref([
     description:
       'ロサンゼルス生まれのスパークリングウォーター。ノンカロリー、ノンアルコールの新感覚飲料です。',
     price: 320,
-    image: '/images/item3.jpg'
+    image: '/images/item3.jpg',
+    soldOut: true
   },
   {
     id: 4,
@@ -32,9 +35,30 @@ const items = ref([
     description:
       'イタリア産チーズをたっぷりかけたアツアツのフレンチフライ。みんな大好きな一品です。',
     price: 670,
-    image: '/images/item4.jpg'
+    image: '/images/item4.jpg',
+    soldOut: false
   }
 ])
+
+function pricePrefix(price) {
+  return price.toLocaleString();
+}
+function stockQuantity() {
+  return items.value.filter(item => item.soldOut === false ).length;
+}
+function stockItem(item) {
+  item.soldOut = false;
+}
+function getDate() {
+  return Date.now();
+}
+
+const stockQuantityComputed = computed(function() {
+  return items.value.filter(item => item.soldOut === false ).length;
+})
+const getDateComputed = computed(function() {
+  return Date.now()
+})
 </script>
 
 <template>
@@ -44,11 +68,15 @@ const items = ref([
       alt="">
     <h1>Vue.js ハンズオン</h1>
   </header>
+  <div>商品数：{{ stockQuantity() }}</div>
+  <div>現在時刻：{{ getDate() }}</div>
+  <div>現在時刻(computed)：{{ getDateComputed }}</div>
   <main class="main">
     <template
       v-for="item in items"
       :key="item.id">
-      <div class="item">
+      <div v-if="!item.soldOut"
+        class="item">
         <div class="thumbnail">
           <img
             :src="item.image"
@@ -57,8 +85,11 @@ const items = ref([
         <div class="description">
           <h2>{{ item.name }}</h2>
           <p>{{ item.description }}</p>
-          <span>¥<span class="price">{{ item.price }}</span></span>
+          <span>¥<span class="price">{{ pricePrefix(item.price) }}</span></span>
         </div>
+      </div>
+      <div v-else>
+        売り切れです<button type="button" @click="stockItem(item)">入荷</button>
       </div>
     </template>
   </main>
